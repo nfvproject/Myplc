@@ -1,0 +1,873 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+Default PLC configuration file
+
+Mark Huang <mlhuang@cs.princeton.edu>
+Copyright (C) 2006 The Trustees of Princeton University
+
+-->
+
+<!DOCTYPE configuration PUBLIC "-//PlanetLab Central//DTD PLC configuration//EN" "plc_config.dtd">
+
+<configuration>
+  <variables>
+    <category id="plc">
+      <name>System</name>
+      <description>Basic system variables. Be sure that the values of
+      these variables are the same across all machines in your
+      installation.</description>
+
+      <variablelist>
+	<variable id="name" type="string">
+	  <name>Name</name>
+	  <value>PlanetLab Test</value>
+	  <description>The name of this PLC installation. It is used in
+	  the name of the default system site (e.g., PlanetLab Central)
+	  and in the names of various administrative entities (e.g.,
+	  PlanetLab Support).</description>
+	</variable>
+
+	<variable id="shortname" type="string">
+	  <name>Shortame</name>
+	  <value>Tlab</value>
+	  <description>The short name of this PLC installation. It is
+	  mostly used in the web interface when displaying local
+	  objects.</description>
+	</variable>
+
+	<variable id="hrn_root" type="string">
+	  <name>Root in Hierarchical Naming Space </name>
+	  <value>ceni</value>
+	  <description> The root of this peer in the hierarchical federation naming space.</description>
+	</variable>
+
+	<variable id="slice_prefix" type="string">
+	  <name>Slice Prefix</name>
+	  <value>pl</value>
+	  <description>The abbreviated name of this PLC
+	  installation. It is used as the prefix for system slices
+	  (e.g., pl_conf). Warning: Currently, this variable should
+	  not be changed.</description>
+	</variable>
+
+	<variable id="root_user" type="email">
+	  <name>Root Account</name>
+	  <value>root@localhost.localdomain</value>
+	  <description>The name of the initial administrative
+	  account. We recommend that this account be used only to create
+	  additional accounts associated with real
+	  administrators, then disabled.</description>
+	</variable>
+
+	<variable id="root_password" type="password">
+	  <name>Root Password</name>
+	  <value>root</value>
+	  <description>The password of the initial administrative
+	  account. Also the password of the root account on the Boot
+	  CD.</description>
+	</variable>
+
+	<!-- The following are not actually meant to be configurable
+	     as variables. The web interface should allow the file to
+	     be downloaded, or its contents replaced by a file upload,
+	     but the actual <value> shouldn't need to be changed.  -->
+
+	<variable id="root_ssh_key_pub" type="file">
+	  <name>Root SSH Public Key</name>
+	  <value>/etc/planetlab/root_ssh_key.pub</value>
+	  <description>The SSH public key used to access the root
+	  account on your nodes.</description>
+	</variable>
+
+	<variable id="root_ssh_key" type="file">
+	  <name>Root SSH Private Key</name>
+	  <value>/etc/planetlab/root_ssh_key.rsa</value>
+	  <description>The SSH private key used to access the root
+	  account on your nodes.</description>
+	</variable>
+
+	<variable id="debug_ssh_key_pub" type="file">
+	  <name>Debug SSH Public Key</name>
+	  <value>/etc/planetlab/debug_ssh_key.pub</value>
+	  <description>The SSH public key used to access the root
+	  account on your nodes when they are in Debug mode.</description>
+	</variable>
+
+	<variable id="debug_ssh_key" type="file">
+	  <name>Debug SSH Private Key</name>
+	  <value>/etc/planetlab/debug_ssh_key.rsa</value>
+	  <description>The SSH private key used to access the root
+	  account on your nodes when they are in Debug mode.</description>
+	</variable>
+
+	<variable id="root_gpg_key_pub" type="file">
+	  <name>Root GPG Public Keyring</name>
+	  <value>/etc/planetlab/pubring.gpg</value>
+	  <description>The GPG public keyring used to sign the Boot
+	  Manager and all node packages.</description>
+	</variable>
+
+	<variable id="root_gpg_key" type="file">
+	  <name>Root GPG Private Keyring</name>
+	  <value>/etc/planetlab/secring.gpg</value>
+	  <description>The SSH private key used to access the root
+	  account on your nodes.</description>
+	</variable>
+
+      </variablelist>
+    </category>
+
+    <category id="plc_flavour">
+      <name>Flavours</name>
+      <description>Defaults for nodes and slices contents.</description>
+      
+      <variablelist>
+	<variable id="virt_map" type="string">
+	  <value> f8,f12,f14,centos5,centos6:vs; default:lxc </value>
+	  <description>Allows to compute a virtualization mechanism
+	  from an fcdistro. Starting with 5.2 MyPLC has support for
+	  either 'vs' or 'lxc', and this gives a correspondance from
+	  the node's fcdistro to the right virtualization mechanism.
+	  This information is essentially used by the BootManager for
+	  getting the installation phase right like e.g. when
+	  partitioning disks, and not to figure the contents of the
+	  nodeimage that depend only on fcdistro, pldistro and of
+	  course arch. This can be overridden by setting the vrt tag
+	  on that particular node. </description>
+	</variable>
+
+	<variable id="node_arch" type="string">
+	  <name>arch for nodes</name>
+	  <value>x86_64</value>
+	  <description>The default 'arch' to use when installing nodes.
+	  This is offered mostly for consistency with the rest of the
+	  PLC_FLAVOUR category, but does not have much of a practical
+	  interest. In any case, you need to have the corresponding
+	  bootstrapfs images available for nodes.</description>
+	</variable>
+
+	<variable id="node_fcdistro" type="string">
+	  <name>fcdistro for nodes</name>
+	  <value>f18</value>
+	  <description>THIS CURRENTLY HAS NO EFFECT.
+          The default 'fcdistro' to use when installing
+	  nodes.You need to have the corresponding bootstrapfs images
+	  available for nodes. THIS CURRENTLY HAS NO EFFECT.</description>
+	</variable>
+
+	<variable id="node_pldistro" type="string">
+	  <name>pldistro for nodes</name>
+	  <value>lxc</value>
+	  <description>The default 'pldistro' to use when installing
+	  nodes. You need to have the corresponding bootstrapfs
+	  images available for nodes.</description>
+	</variable>
+
+	<variable id="slice_arch" type="string">
+	  <name>arch for slivers</name>
+	  <value>x86_64</value>
+	  <description>The default 'arch' to use for slivers. This is
+	  useful if you have heterogeneous nodes (i686 and x86_64),
+	  but want slivers to be homogeneous. You need to have the
+	  corresponding vserver variant rpm available for
+	  nodes.</description>
+	</variable>
+
+	<variable id="slice_fcdistro" type="string">
+	  <name>fcdistro for slivers</name>
+	  <value>f18</value>
+	  <description>The default 'fcdistro' to use for creating
+	  slivers. You need to have the corresponding vserver variant
+	  rpm available for nodes.</description>
+	</variable>
+
+	<variable id="slice_pldistro" type="string">
+	  <name>pldistro for slivers</name>
+	  <value>lxc</value>
+	  <description>The default 'pldistro' to use for creating
+	  slivers. You need to have the corresponding vserver variant
+	  rpm available for nodes.</description>
+	</variable>
+
+      </variablelist>
+    </category>
+
+    <category id="plc_net">
+      <name>Network</name>
+      <description>Network environment.</description>
+
+      <variablelist>
+	<variable id="dns1" type="ip">
+	  <name>Primary DNS Server</name>
+	  <value>127.0.0.1</value>
+	  <description>Primary DNS server address.</description>
+	</variable>
+
+	<variable id="dns2" type="ip">
+	  <name>Secondary DNS Server</name>
+	  <value></value>
+	  <description>Secondary DNS server address.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_dns">
+      <name>DNS</name>
+      <description>MyPLC can provide forward DNS resolution for itself
+      and for its nodes. To enable resolution for MyPLC itself, set
+      the Primary DNS Server address to 127.0.0.1 and provide external
+      IP addresses for the database, API, web, and boot servers
+      below. To enable resolution for nodes, use the external IP
+      address of this machine as the primary DNS server address for
+      each node.</description>
+
+      <variablelist>
+        <variable id="enabled" type="boolean">
+          <name>Enable DNS</name>
+          <value>true</value>
+          <description>Enable the internal DNS server. The server does
+          not provide reverse resolution and is not a production
+          quality or scalable DNS solution. Use the internal DNS
+          server only for small deployments or for
+          testing.</description>
+        </variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_hosts">
+      <name>/etc/hosts</name>
+      <description>MyPLC can setup /etc/hosts with the hostnames and
+      IP addresses specified for *_NAME and *_IP, or look up the IP
+      addresses if they are not specified in this configuration.
+      </description>
+
+      <variablelist>
+        <variable id="enabled" type="boolean">
+          <name>Enable /etc/hosts configuration</name>
+          <value>true</value>
+          <description>Let PLC manage /etc/hosts</description>
+        </variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_mail">
+      <name>Mail</name>
+      <description>Many maintenance scripts, as well as the API and
+      web site themselves, send e-mail notifications and
+      warnings.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enable Mail</name>
+	  <value>false</value>
+	  <description>Set to false to suppress all e-mail notifications
+	  and warnings.</description>
+	</variable>
+
+	<variable id="support_address" type="email">
+	  <name>Support Address</name>
+	  <value>root+support@localhost.localdomain</value>
+	  <description>This address is used for support
+	  requests. Support requests may include traffic complaints,
+	  security incident reporting, web site malfunctions, and
+	  general requests for information. We recommend that the
+	  address be aliased to a ticketing system such as Request
+	  Tracker.</description>
+	</variable>
+
+	<variable id="boot_address" type="email">
+	  <name>Boot Messages Address</name>
+	  <value>root+install-msgs@localhost.localdomain</value>
+	  <description>The API will notify this address when a problem
+	  occurs during node installation or boot.</description>
+	</variable>
+
+	<variable id="mom_list_address" type="email">
+	  <name>Mom List Address</name>
+	  <value>root+mom@localhost.localdomain</value>
+	  <description>This address is used by operations staff
+	  to monitor Mom (formerly pl_mom) messages indicating
+	  excessive BW or memory usage by a slice.  Mom messages sent
+	  to slices will be cc'ed to this list so as not to clog
+	  the Support Address list.</description>
+	</variable>
+
+	<variable id="slice_address" type="email">
+	  <name>Slice Address</name>
+	  <value>root+SLICE@localhost.localdomain</value>
+	  <description>This address template is used for sending
+	  e-mail notifications to slices. SLICE will be replaced with
+	  the name of the slice.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_db">
+      <name>Database Server</name>
+      <description>Database server definitions.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enabled</name>
+	  <value>true</value>
+	  <description>Enable the database server on this
+	  machine.</description>
+	</variable>
+
+	<variable id="type" type="string">
+	  <name>Type</name>
+	  <value>postgresql</value>
+	  <description>The type of database server. Currently, only
+	  postgresql is supported.</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost.localdomain</value>
+	  <description>The fully qualified hostname of the database
+	  server.</description>
+	</variable>
+
+        <variable id="ip" type="ip">
+          <name>IP Address</name>
+          <value/>
+          <description>The IP address of the database server, if not
+          resolvable.</description>
+        </variable>
+
+	<variable id="port" type="int">
+	  <name>Port</name>
+	  <value>5432</value>
+	  <description>The TCP port number through which the database
+	  server should be accessed.</description>
+	</variable>
+
+	<variable id="name" type="string">
+	  <name>Database Name</name>
+	  <value>planetlab5</value>
+	  <description>The name of the database to access.</description>
+	</variable>
+
+	<variable id="user" type="string">
+	  <name>Database Username</name>
+	  <value>pgsqluser</value>
+	  <description>The username to use when accessing the
+	  database.</description>
+	</variable>
+
+	<variable id="password" type="password">
+	  <name>Database Password</name>
+	  <value></value>
+	  <description>The password to use when accessing the
+	  database. If left blank, one will be
+	  generated.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_api">
+      <name>API Server</name>
+      <description>API (XML-RPC) server definitions.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enabled</name>
+	  <value>true</value>
+	  <description>Enable the API server on this
+	  machine.</description>
+	</variable>
+
+	<variable id="debug" type="boolean">
+	  <name>Debug</name>
+	  <value>false</value>
+	  <description>Enable verbose API debugging. Do not enable on
+	  a production system!</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost.localdomain</value>
+	  <description>The fully qualified hostname of the API
+	  server.</description>
+	</variable>
+
+        <variable id="ip" type="ip">
+          <name>IP Address</name>
+          <value/>
+          <description>The IP address of the API server, if not
+          resolvable.</description>
+        </variable>
+
+        <variable id="ipod_subnet" type="ip">
+          <name>IP Subnet</name>
+          <value>127.0.0.1</value>
+          <description>The IP Subnet for all API servers. 
+	  Used to identify IPoD packet senders.</description>
+        </variable>
+
+        <variable id="ipod_mask" type="ip">
+          <name>IP Mask</name>
+          <value>255.255.255.255</value>
+          <description>The IP Mask that should be applied to incoming 
+	  packets to match the IP Subnet for IPoD packets.</description>
+        </variable>
+
+	<variable id="port" type="int">
+	  <name>Port</name>
+	  <value>443</value>
+	  <description>The TCP port number through which the API
+	  should be accessed.</description>
+	</variable>
+
+	<variable id="path" type="string">
+	  <name>Path</name>
+	  <value>/PLCAPI/</value>
+	  <description>The base path of the API URL.</description>
+	</variable>
+
+	<variable id="maintenance_user" type="string">
+	  <name>Maintenance User</name>
+	  <value>maint@localhost.localdomain</value>
+	  <description>The username of the maintenance account. This
+	  account is used by local scripts that perform automated
+	  tasks, and cannot be used for normal logins.</description>
+	</variable>
+
+	<variable id="maintenance_password" type="password">
+	  <name>Maintenance Password</name>
+	  <value></value>
+	  <description>The password of the maintenance account. If
+	  left blank, one will be generated. We recommend that the
+	  password be changed periodically.</description>
+	</variable>
+
+	<variable id="maintenance_sources" type="hostname">
+	  <name>Authorized Hosts</name>
+	  <value></value>
+	  <description>A space-separated list of IP addresses allowed
+	  to access the API through the maintenance account. The value
+	  of this variable is set automatically to allow only the API,
+	  web, and boot servers, and should not be
+	  changed.</description>
+	</variable>
+
+	<!-- The following are not actually meant to be configurable
+	     as variables. The web interface should allow the file to
+	     be downloaded, or its contents replaced by a file upload,
+	     but the actual <value> shouldn't need to be changed.  -->
+
+	<variable id="ssl_key" type="file">
+	  <name>SSL Private Key</name>
+	  <value>/etc/planetlab/api_ssl.key</value>
+	  <description>The SSL private key to use for encrypting HTTPS
+	  traffic. If non-existent, one will be
+	  generated.</description>
+	</variable>
+
+	<variable id="ssl_crt" type="file">
+	  <name>SSL Public Certificate</name>
+	  <value>/etc/planetlab/api_ssl.crt</value>
+	  <description>The corresponding SSL public certificate. By
+	  default, this certificate is self-signed. You may replace
+	  the certificate later with one signed by a root
+	  CA.</description>
+	</variable>
+
+	<variable id="ca_ssl_crt" type="file">
+	  <name>Root CA SSL Public Certificate</name>
+	  <value>/etc/planetlab/api_ca_ssl.crt</value>
+	  <description>The certificate of the root CA, if any, that
+	  signed your server certificate. If your server certificate is
+	  self-signed, then this file is the same as your server
+	  certificate.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_www">
+      <name>Web Server</name>
+      <description>Web server definitions.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enabled</name>
+	  <value>true</value>
+	  <description>Enable the web server on this
+	  machine.</description>
+	</variable>
+
+	<variable id="debug" type="boolean">
+	  <name>Debug</name>
+	  <value>false</value>
+	  <description>Enable debugging output on web pages. Do not
+	  enable on a production system!</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost.localdomain</value>
+	  <description>The fully qualified hostname of the web
+	  server.</description>
+	</variable>
+
+        <variable id="ip" type="ip">
+          <name>IP Address</name>
+          <value/>
+          <description>The IP address of the web server, if not
+          resolvable.</description>
+        </variable>
+
+	<variable id="port" type="int">
+	  <name>Port</name>
+	  <value>80</value>
+	  <description>The TCP port number through which the
+	  unprotected portions of the web site should be
+	  accessed.</description>
+	</variable>
+
+	<variable id="ssl_port" type="int">
+	  <name>SSL Port</name>
+	  <value>443</value>
+	  <description>The TCP port number through which the protected
+	  portions of the web site should be accessed.</description>
+	</variable>
+
+	<!-- The following are not actually meant to be configurable
+	     as variables. The web interface should allow the file to
+	     be downloaded, or its contents replaced by a file upload,
+	     but the actual <value> shouldn't need to be changed.  -->
+
+	<variable id="ssl_key" type="file">
+	  <name>SSL Private Key</name>
+	  <value>/etc/planetlab/www_ssl.key</value>
+	  <description>The SSL private key to use for encrypting HTTPS
+	  traffic. If non-existent, one will be
+	  generated.</description>
+	</variable>
+
+	<variable id="ssl_crt" type="file">
+	  <name>SSL Public Certificate</name>
+	  <value>/etc/planetlab/www_ssl.crt</value>
+	  <description>The corresponding SSL public certificate for
+	  the HTTP server. By default, this certificate is
+	  self-signed. You may replace the certificate later with one
+	  signed by a root CA.</description>
+	</variable>
+
+	<variable id="ca_ssl_crt" type="file">
+	  <name>Root CA SSL Public Certificate</name>
+	  <value>/etc/planetlab/www_ca_ssl.crt</value>
+	  <description>The certificate of the root CA, if any, that
+	  signed your server certificate. If your server certificate is
+	  self-signed, then this file is the same as your server
+	  certificate.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_boot">
+      <name>Boot Server</name>
+      <description>Boot server definitions. Multiple boot servers
+      may be brought up for load balancing, but we recommend that a
+      single DNS round-robin system be implemented so that the
+      following variables are the same across all of
+      them.</description>
+
+      <variablelist>
+	<variable id="enabled" type="boolean">
+	  <name>Enabled</name>
+	  <value>true</value>
+	  <description>Enable the boot server on this
+	  machine.</description>
+	</variable>
+
+	<variable id="host" type="hostname">
+	  <name>Hostname</name>
+	  <value>localhost.localdomain</value>
+	  <description>The fully qualified hostname of the boot
+	  server.</description>
+	</variable>
+
+        <variable id="ip" type="ip">
+          <name>IP Address</name>
+          <value/>
+          <description>The IP address of the boot server, if not
+          resolvable.</description>
+        </variable>
+
+	<variable id="port" type="int">
+	  <name>Port</name>
+	  <value>80</value>
+	  <description>The TCP port number through which the
+	  unprotected portions of the boot server should be
+	  accessed.</description>
+	</variable>
+
+	<variable id="ssl_port" type="int">
+	  <name>SSL Port</name>
+	  <value>443</value>
+	  <description>The TCP port number through which the protected
+	  portions of the boot server should be
+	  accessed.</description>
+	</variable>
+
+	<!-- The following are not actually meant to be configurable
+	     as variables. The web interface should allow the file to
+	     be downloaded, or its contents replaced by a file upload,
+	     but the actual <value> shouldn't need to be changed.  -->
+
+	<variable id="ssl_key" type="file">
+	  <name>SSL Private Key</name>
+	  <value>/etc/planetlab/boot_ssl.key</value>
+	  <description>The SSL private key to use for encrypting HTTPS
+	  traffic.</description>
+	</variable>
+
+	<variable id="ssl_crt" type="file">
+	  <name>SSL Public Certificate</name>
+	  <value>/etc/planetlab/boot_ssl.crt</value>
+	  <description>The corresponding SSL public certificate for
+	  the HTTP server. By default, this certificate is
+	  self-signed. You may replace the certificate later with one
+	  signed by a root CA.</description>
+	</variable>
+
+	<variable id="ca_ssl_crt" type="file">
+	  <name>Root CA SSL Public Certificate</name>
+	  <value>/etc/planetlab/boot_ca_ssl.crt</value>
+	  <description>The certificate of the root CA, if any, that
+	  signed your server certificate. If your server certificate is
+	  self-signed, then this file is the same as your server
+	  certificate.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_ratelimit">
+      <name>Planetlab Ratelimit Settings</name>
+      <description>Planetlab Ratelimit Settings</description>
+      <variablelist>
+        <variable id="enabled" type="bolean">
+          <name>Enable Ratelimit</name>
+          <value>false</value>
+          <description>Enable Ratelimit for sites</description>
+        </variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_omf">
+      <name>Planetlab - OMF Integration</name>
+      <description>Planetlab - OMF integration</description>
+      <variablelist>
+        <variable id="enabled" type="boolean">
+          <name>OMF integration</name>
+          <value>false</value>
+          <description>Enable OMF integration.</description>
+        </variable>
+
+        <!-- xmpp server configuration -->
+        <variable id="xmpp_server" type="string">
+          <name>XMPP server</name>
+          <value>localhost.localdomain</value>
+          <description>The fully qualified hostname of the XMPP server.</description>
+        </variable>
+
+      </variablelist>
+    </category>
+
+    <category id="plc_reservation">
+      <name> Reservable Nodes</name>
+      <description> Settings related to reservable nodes </description>
+
+      <variablelist>
+	<variable id="granularity" type="int">
+	  <name>Lease granularity</name>
+	  <value>3600</value>
+	  <description>The smallest timeslot that can be allocated to
+	  a node. All leases will be rounded to this granularity, so
+	  e.g. if you set 3600 all leases will start and stop at round
+	  hours.</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_planetflow">
+      <name>PlanetFlow Service Configuration</name>
+      <description>Planetflow service definitions used in the netflow slice. </description>
+
+      <variablelist>
+        <variable id="host" type="hostname">
+	        <name>Hostname</name>
+	        <value>localhost.localdomain</value>
+	        <description>The fully qualified hostname.</description>
+        </variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_monitor">
+      <name>Monitoring Service</name>
+      <description>The Monitor service that tracks node availablity and repair.</description>
+      <variablelist>
+        <variable id="enabled" type="boolean">
+          <name>Enabled</name>
+          <value>false</value>
+          <description>Enable on this machine.</description>
+        </variable>
+        <variable id="host" type="hostname">
+          <name>Hostname</name>
+          <value>localhost.localdomain</value>
+          <description>The fully qualified hostname.</description>
+        </variable>
+        <variable id="ip" type="ip">
+          <name>IP Address</name>
+          <value></value>
+          <description>The IP address of the monitor server.</description>
+        </variable>
+        <variable id="from_email" type="email">
+          <name>Monitor Email Address</name>
+          <value>root+monitor@localhost.localdomain</value>
+          <description>All messages from Monitor will appear to come from this address.</description>
+        </variable>
+        <variable id="cc_email" type="email">
+          <name>CC Email Address</name>
+          <value>root+monitor@localhost.localdomain</value>
+          <description>All messages from Monitor will be copied to this address.</description>
+        </variable>
+        <variable id="rt_queue" type="email">
+          <name>Queue Name in RT for new messages</name>
+          <value>support</value>
+          <description>All messages from Monitor will be copied to this address.</description>
+        </variable>
+        <variable id="dbhost" type="hostname">
+          <name>Database Hostname</name>
+          <value>localhost</value>
+          <description>The hostname for the monitor database.</description>
+        </variable>
+        <variable id="dbuser" type="string">
+          <name>Database User</name>
+          <value>monitoruser</value>
+          <description>The username for connecting to the monitor database.</description>
+        </variable>
+        <variable id="dbname" type="string">
+          <name>Database Name</name>
+          <value>monitor</value>
+          <description>Name of monitor database.</description>
+        </variable>
+        <variable id="dbpassword" type="password">
+          <name>Database Password</name>
+          <value></value>
+          <description>The password to use when accessing the
+          database, Monitor user account in the local PLC.</description>
+        </variable>
+
+	    <variable id="ssl_key" type="file">
+		  <name>SSL Private Key</name>
+		  <value>/etc/planetlab/monitor_ssl.key</value>
+		  <description>The SSL private key to use for encrypting HTTPS
+		  traffic.</description>
+		</variable>
+
+		<variable id="ssl_crt" type="file">
+		  <name>SSL Public Certificate</name>
+		  <value>/etc/planetlab/monitor_ssl.crt</value>
+		  <description>The corresponding SSL public certificate for
+		  the HTTP server. By default, this certificate is
+		  self-signed. You may replace the certificate later with one
+		  signed by a root CA.</description>
+		</variable>
+
+		<variable id="ca_ssl_crt" type="file">
+		  <name>Root CA SSL Public Certificate</name>
+		  <value>/etc/planetlab/monitor_ca_ssl.crt</value>
+		  <description>The certificate of the root CA, if any, that
+		  signed your server certificate. If your server certificate is
+		  self-signed, then this file is the same as your server
+		  certificate.</description>
+		</variable>
+
+      </variablelist>
+    </category>
+    <category id="plc_rt">
+      <name>RT Configuration</name>
+      <description>RT</description>
+      <variablelist>
+        <variable id="enabled" type="boolean">
+          <name>Enabled</name>
+          <value>false</value>
+          <description>Enable on this machine.</description>
+        </variable>
+        <variable id="host" type="hostname">
+          <name>Hostname</name>
+          <value>localhost.localdomain</value>
+          <description>The fully qualified hostname.</description>
+        </variable>
+        <variable id="ip" type="ip">
+          <name>IP Address</name>
+          <value/>
+          <description>The IP address of the RT server.</description>
+        </variable>
+        <variable id="cc_address" type="email">
+          <name>CC Email Address</name>
+          <value>root+cclist@localhost.localdomain</value>
+          <description>All messages to and from PLCRT will be copied to this address.</description>
+        </variable>
+        <variable id="web_user" type="string">
+          <name>root</name>
+          <value>root</value>
+          <description>Username of a privileged user in RT who can create
+		  tickets for any RT Queue.</description>
+        </variable>
+        <variable id="web_password" type="password">
+          <name>password</name>
+          <value>password</value>
+          <description>Password for RT web user.</description>
+        </variable>
+        <variable id="dbpassword" type="password">
+          <name>Database Password</name>
+          <value></value>
+          <description>Password to use when accessing the RT database.</description>
+        </variable>
+      </variablelist>
+    </category>
+
+    <category id="myslice">
+      <name>MySlice</name>
+      <description>MySlice configuration parameters</description>
+      <variablelist>
+	<variable id="comon_url" type="string">
+	  <name>comon</name>
+	  <value></value>
+	  <description>The address of the CoMon url that provides information for this PLC's nodes (if not the default http://comon.cs.princeton.edu/)</description>
+	</variable>
+	<variable id="comon_available" type="boolean">
+	  <name>comon</name>
+	  <value>false</value>
+	  <description>True, if comon data are available for this PLC's nodes</description>
+	</variable>
+	<variable id="tophat_available" type="boolean">
+	  <name>tophat</name>
+	  <value>false</value>
+	  <description>True, if tophat data are available for this PLC's nodes</description>
+	</variable>
+      </variablelist>
+    </category>
+
+    <category id="plc_vsys">
+      <name>vsys</name>
+      <description>Default values for the vsys tag</description>
+      <variablelist>
+	<variable id="defaults" type="string">
+	  <name>vsys tags set by default</name>
+	  <value> </value>
+	  <description>Comma-separated list of vsys script names that all newly created slices will have as their vsys tags. For older slices, see the check-vsys-defaults.py script as part of the myplc package</description>
+	</variable>
+      </variablelist>
+    </category>
+  </variables>
+
+  <comps>
+    <!-- deprecated - not used anymore - use .lst files instead -->
+  </comps>
+
+</configuration>

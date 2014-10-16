@@ -1,0 +1,60 @@
+<html><head>
+<title>Accessors_site.py</title>
+<meta name="Generator" content="htmlizer/[twisted, version 12.1.0]" />
+<link rel="alternate" href="Accessors_site.py" type="text/x-python" />
+
+</head>
+<body>
+<pre><span class="py-src-comment">#</span>
+<span class="py-src-comment"># Thierry Parmentelat - INRIA</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-comment"># Accessors_site.py is the place where you can define your own local tag accessors</span>
+<span class="py-src-comment"># this will not be overwritten through rpm upgrades</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-comment"># Historical note: now that Sites are taggable too, the name may be confusing, </span>
+<span class="py-src-comment"># think of this as Accessors_local.py</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-comment"># to ensure creation of new tag_types, just run </span>
+<span class="py-src-comment">#   service plc start accessors</span>
+<span class="py-src-comment"># also for the running API to take the new accessors into account, you need to</span>
+<span class="py-src-comment">#   apachectl restart</span>
+<span class="py-src-comment"># or to stay on the safe side, simply do</span>
+<span class="py-src-comment">#   service plc restart</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-comment"># methods denotes the set of methods (names) that get inserted into the API</span>
+<span class="py-src-comment"># it is updated by define_accessors</span>
+
+<span class="py-src-variable">methods</span>=[]
+
+<span class="py-src-keyword">from</span> <span class="py-src-variable">PLC</span>.<span class="py-src-variable">Nodes</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">Node</span>,<span class="py-src-variable">Nodes</span>
+<span class="py-src-keyword">from</span> <span class="py-src-variable">PLC</span>.<span class="py-src-variable">Interfaces</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">Interface</span>
+<span class="py-src-keyword">from</span> <span class="py-src-variable">PLC</span>.<span class="py-src-variable">Slices</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">Slice</span>
+<span class="py-src-keyword">from</span> <span class="py-src-variable">PLC</span>.<span class="py-src-variable">Sites</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">Site</span>
+<span class="py-src-keyword">from</span> <span class="py-src-variable">PLC</span>.<span class="py-src-variable">Persons</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">Person</span>
+
+<span class="py-src-keyword">from</span> <span class="py-src-variable">PLC</span>.<span class="py-src-variable">Accessors</span>.<span class="py-src-variable">Factory</span> <span class="py-src-keyword">import</span> <span class="py-src-variable">define_accessors</span>, <span class="py-src-variable">all_roles</span>, <span class="py-src-variable">person_roles</span>, <span class="py-src-variable">tech_roles</span>
+
+<span class="py-src-keyword">import</span> <span class="py-src-variable">sys</span>
+<span class="py-src-variable">current_module</span> = <span class="py-src-variable">sys</span>.<span class="py-src-variable">modules</span>[<span class="py-src-variable">__name__</span>]
+
+<span class="py-src-comment">#### example : attach vlan ids on interfaces</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-comment">#define_accessors(current_module, Interface, "Vlan", "vlan",</span>
+<span class="py-src-comment">#                  "interface/general", "tag for setting VLAN id",</span>
+<span class="py-src-comment">#                  get_roles=all_roles, set_roles=tech_roles)</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-comment"># The optional expose_in_api is a boolean flag that tells whether this tag may be handled</span>
+<span class="py-src-comment">#   through the Add/Get/Update methods as a native field</span>
+<span class="py-src-comment"># e.g. </span>
+<span class="py-src-comment">#define_accessors(current_module, Node, "Foo", "foo",</span>
+<span class="py-src-comment">#                  "node/example", "my own description for foo",</span>
+<span class="py-src-comment">#                  get_roles=all_roles, set_roles=all_roles)</span>
+<span class="py-src-comment"># will let you do</span>
+<span class="py-src-comment"># GetNodes ( {'foo':'*bar*'},['hostname','foo'])</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-comment">#</span>
+<span class="py-src-variable">define_accessors</span>(<span class="py-src-variable">current_module</span>, <span class="py-src-variable">Node</span>, <span class="py-src-string">"Memory"</span>, <span class="py-src-string">"memory"</span>,
+                 <span class="py-src-string">"node/miscell"</span>, <span class="py-src-string">"expose node memory size in Gb"</span>,
+                 <span class="py-src-variable">get_roles</span>=<span class="py-src-variable">all_roles</span>,<span class="py-src-variable">set_roles</span>=<span class="py-src-variable">tech_roles</span>) 
+</pre>
+</body>

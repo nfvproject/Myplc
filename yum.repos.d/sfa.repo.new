@@ -1,0 +1,5 @@
+[sfa]
+name=SFA
+baseurl=http://build.onelab.eu/sfa/stable-sfa3-f18-64/RPMS/
+enabled=1
+gpgcheck=0

@@ -1,0 +1,3 @@
+server clock.redhat.com
+server time.apple.com
+server pool.ntp.org

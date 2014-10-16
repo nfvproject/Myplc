@@ -1,0 +1,714 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="wsdl2html.xsl"?>
+<wsdl:definitions name="myplc-sfa-slicemgr" targetNamespace="http://www.planet-lab.org/sfa/sfa.wsdl" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="http://www.planet-lab.org/sfa/sfa.wsdl" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsdl="http://www.planet-lab.org/sfa/schema">
+	<message name="Allocate_in">
+		<part name="xrn" type="xsd:string"/>
+		<part name="creds" type="xsd:arrayType"/>
+		<part name="rspec" type="xsd:string"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="Allocate_out">
+		<part name="Result" type="xsd:string"/>
+	</message>
+	<portType name="Allocate_port">
+		<operation name="Allocate">
+			<input message="tns:Allocate_in" name="Allocate_request"/>
+			<output message="tns:Allocate_out" name="Allocate_response"/>
+		</operation>
+	</portType>
+	<binding name="Allocate_binding" type="tns:Allocate_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Allocate">
+			<soap:operation soapAction="urn:Allocate"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Allocate" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Allocate" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="CreateGid_in">
+		<part name="creds" type="xsdl:Type1"/>
+		<part name="xrn" type="xsd:string"/>
+		<part name="cert" type="xsd:string"/>
+	</message>
+	<message name="CreateGid_out">
+		<part name="Result" type="xsd:int"/>
+	</message>
+	<portType name="CreateGid_port">
+		<operation name="CreateGid">
+			<input message="tns:CreateGid_in" name="CreateGid_request"/>
+			<output message="tns:CreateGid_out" name="CreateGid_response"/>
+		</operation>
+	</portType>
+	<binding name="CreateGid_binding" type="tns:CreateGid_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="CreateGid">
+			<soap:operation soapAction="urn:CreateGid"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:CreateGid" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:CreateGid" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Delete_in">
+		<part name="xrns" type="xsd:arrayType"/>
+		<part name="creds" type="xsd:arrayType"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="Delete_out">
+		<part name="Result" type="xsd:int"/>
+	</message>
+	<portType name="Delete_port">
+		<operation name="Delete">
+			<input message="tns:Delete_in" name="Delete_request"/>
+			<output message="tns:Delete_out" name="Delete_response"/>
+		</operation>
+	</portType>
+	<binding name="Delete_binding" type="tns:Delete_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Delete">
+			<soap:operation soapAction="urn:Delete"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Delete" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Delete" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Describe_in">
+		<part name="urns" type="xsd:arrayType"/>
+		<part name="creds" type="xsdl:Type2"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="Describe_out">
+		<part name="Result" type="xsd:string"/>
+	</message>
+	<portType name="Describe_port">
+		<operation name="Describe">
+			<input message="tns:Describe_in" name="Describe_request"/>
+			<output message="tns:Describe_out" name="Describe_response"/>
+		</operation>
+	</portType>
+	<binding name="Describe_binding" type="tns:Describe_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Describe">
+			<soap:operation soapAction="urn:Describe"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Describe" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Describe" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="GetCredential_in">
+		<part name="creds" type="xsdl:Type3"/>
+		<part name="xrn" type="xsd:string"/>
+		<part name="type" type="xsdl:Type4"/>
+	</message>
+	<message name="GetCredential_out">
+		<part name="Result" type="xsd:string"/>
+	</message>
+	<portType name="GetCredential_port">
+		<operation name="GetCredential">
+			<input message="tns:GetCredential_in" name="GetCredential_request"/>
+			<output message="tns:GetCredential_out" name="GetCredential_response"/>
+		</operation>
+	</portType>
+	<binding name="GetCredential_binding" type="tns:GetCredential_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="GetCredential">
+			<soap:operation soapAction="urn:GetCredential"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetCredential" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetCredential" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="GetGids_in">
+		<part name="xrns" type="xsdl:Type5"/>
+		<part name="creds" type="xsdl:Type6"/>
+	</message>
+	<message name="GetGids_out">
+		<part name="Result" type="xsdl:Type7"/>
+	</message>
+	<portType name="GetGids_port">
+		<operation name="GetGids">
+			<input message="tns:GetGids_in" name="GetGids_request"/>
+			<output message="tns:GetGids_out" name="GetGids_response"/>
+		</operation>
+	</portType>
+	<binding name="GetGids_binding" type="tns:GetGids_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="GetGids">
+			<soap:operation soapAction="urn:GetGids"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetGids" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetGids" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="GetSelfCredential_in">
+		<part name="cert" type="xsd:string"/>
+		<part name="xrn" type="xsd:string"/>
+		<part name="type" type="xsdl:Type8"/>
+	</message>
+	<message name="GetSelfCredential_out">
+		<part name="Result" type="xsd:string"/>
+	</message>
+	<portType name="GetSelfCredential_port">
+		<operation name="GetSelfCredential">
+			<input message="tns:GetSelfCredential_in" name="GetSelfCredential_request"/>
+			<output message="tns:GetSelfCredential_out" name="GetSelfCredential_response"/>
+		</operation>
+	</portType>
+	<binding name="GetSelfCredential_binding" type="tns:GetSelfCredential_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="GetSelfCredential">
+			<soap:operation soapAction="urn:GetSelfCredential"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetSelfCredential" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetSelfCredential" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="GetVersion_in">
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="GetVersion_out">
+		<part name="Result" type="xsd:anyType"/>
+	</message>
+	<portType name="GetVersion_port">
+		<operation name="GetVersion">
+			<input message="tns:GetVersion_in" name="GetVersion_request"/>
+			<output message="tns:GetVersion_out" name="GetVersion_response"/>
+		</operation>
+	</portType>
+	<binding name="GetVersion_binding" type="tns:GetVersion_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="GetVersion">
+			<soap:operation soapAction="urn:GetVersion"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetVersion" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:GetVersion" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="List_in">
+		<part name="xrn" type="xsd:string"/>
+		<part name="creds" type="xsdl:Type9"/>
+	</message>
+	<message name="List_out">
+		<part name="Result" type="xsdl:Type10"/>
+	</message>
+	<portType name="List_port">
+		<operation name="List">
+			<input message="tns:List_in" name="List_request"/>
+			<output message="tns:List_out" name="List_response"/>
+		</operation>
+	</portType>
+	<binding name="List_binding" type="tns:List_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="List">
+			<soap:operation soapAction="urn:List"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:List" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:List" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="ListResources_in">
+		<part name="creds" type="xsdl:Type11"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="ListResources_out">
+		<part name="Result" type="xsd:string"/>
+	</message>
+	<portType name="ListResources_port">
+		<operation name="ListResources">
+			<input message="tns:ListResources_in" name="ListResources_request"/>
+			<output message="tns:ListResources_out" name="ListResources_response"/>
+		</operation>
+	</portType>
+	<binding name="ListResources_binding" type="tns:ListResources_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="ListResources">
+			<soap:operation soapAction="urn:ListResources"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:ListResources" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:ListResources" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="PerformOperationalAction_in">
+		<part name="xrns" type="xsd:arrayType"/>
+		<part name="creds" type="xsd:arrayType"/>
+		<part name="action" type="xsd:string"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="PerformOperationalAction_out">
+		<part name="Result" type="xsd:anyType"/>
+	</message>
+	<portType name="PerformOperationalAction_port">
+		<operation name="PerformOperationalAction">
+			<input message="tns:PerformOperationalAction_in" name="PerformOperationalAction_request"/>
+			<output message="tns:PerformOperationalAction_out" name="PerformOperationalAction_response"/>
+		</operation>
+	</portType>
+	<binding name="PerformOperationalAction_binding" type="tns:PerformOperationalAction_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="PerformOperationalAction">
+			<soap:operation soapAction="urn:PerformOperationalAction"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:PerformOperationalAction" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:PerformOperationalAction" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Provision_in">
+		<part name="xrns" type="xsd:arrayType"/>
+		<part name="creds" type="xsd:arrayType"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="Provision_out">
+		<part name="Result" type="xsd:anyType"/>
+	</message>
+	<portType name="Provision_port">
+		<operation name="Provision">
+			<input message="tns:Provision_in" name="Provision_request"/>
+			<output message="tns:Provision_out" name="Provision_response"/>
+		</operation>
+	</portType>
+	<binding name="Provision_binding" type="tns:Provision_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Provision">
+			<soap:operation soapAction="urn:Provision"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Provision" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Provision" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Register_in">
+		<part name="record" type="xsd:anyType"/>
+		<part name="creds" type="xsdl:Type12"/>
+	</message>
+	<message name="Register_out">
+		<part name="Result" type="xsd:int"/>
+	</message>
+	<portType name="Register_port">
+		<operation name="Register">
+			<input message="tns:Register_in" name="Register_request"/>
+			<output message="tns:Register_out" name="Register_response"/>
+		</operation>
+	</portType>
+	<binding name="Register_binding" type="tns:Register_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Register">
+			<soap:operation soapAction="urn:Register"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Register" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Register" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Remove_in">
+		<part name="xrn" type="xsd:string"/>
+		<part name="creds" type="xsdl:Type13"/>
+		<part name="type" type="xsdl:Type14"/>
+	</message>
+	<message name="Remove_out">
+		<part name="Result" type="xsd:int"/>
+	</message>
+	<portType name="Remove_port">
+		<operation name="Remove">
+			<input message="tns:Remove_in" name="Remove_request"/>
+			<output message="tns:Remove_out" name="Remove_response"/>
+		</operation>
+	</portType>
+	<binding name="Remove_binding" type="tns:Remove_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Remove">
+			<soap:operation soapAction="urn:Remove"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Remove" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Remove" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Renew_in">
+		<part name="urns" type="xsd:arrayType"/>
+		<part name="creds" type="xsd:arrayType"/>
+		<part name="expiration_time" type="xsd:string"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="Renew_out">
+		<part name="Result" type="xsd:boolean"/>
+	</message>
+	<portType name="Renew_port">
+		<operation name="Renew">
+			<input message="tns:Renew_in" name="Renew_request"/>
+			<output message="tns:Renew_out" name="Renew_response"/>
+		</operation>
+	</portType>
+	<binding name="Renew_binding" type="tns:Renew_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Renew">
+			<soap:operation soapAction="urn:Renew"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Renew" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Renew" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Resolve_in">
+		<part name="xrns" type="xsdl:Type15"/>
+		<part name="creds" type="xsdl:Type16"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="Resolve_out">
+		<part name="Result" type="xsdl:Type17"/>
+	</message>
+	<portType name="Resolve_port">
+		<operation name="Resolve">
+			<input message="tns:Resolve_in" name="Resolve_request"/>
+			<output message="tns:Resolve_out" name="Resolve_response"/>
+		</operation>
+	</portType>
+	<binding name="Resolve_binding" type="tns:Resolve_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Resolve">
+			<soap:operation soapAction="urn:Resolve"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Resolve" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Resolve" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="ResolveGENI_in">
+		<part name="xrn" type="xsd:string"/>
+	</message>
+	<message name="ResolveGENI_out">
+		<part name="Result" type="xsd:boolean"/>
+	</message>
+	<portType name="ResolveGENI_port">
+		<operation name="ResolveGENI">
+			<input message="tns:ResolveGENI_in" name="ResolveGENI_request"/>
+			<output message="tns:ResolveGENI_out" name="ResolveGENI_response"/>
+		</operation>
+	</portType>
+	<binding name="ResolveGENI_binding" type="tns:ResolveGENI_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="ResolveGENI">
+			<soap:operation soapAction="urn:ResolveGENI"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:ResolveGENI" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:ResolveGENI" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Shutdown_in">
+		<part name="xrn" type="xsd:string"/>
+		<part name="creds" type="xsd:arrayType"/>
+	</message>
+	<message name="Shutdown_out">
+		<part name="Result" type="xsd:boolean"/>
+	</message>
+	<portType name="Shutdown_port">
+		<operation name="Shutdown">
+			<input message="tns:Shutdown_in" name="Shutdown_request"/>
+			<output message="tns:Shutdown_out" name="Shutdown_response"/>
+		</operation>
+	</portType>
+	<binding name="Shutdown_binding" type="tns:Shutdown_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Shutdown">
+			<soap:operation soapAction="urn:Shutdown"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Shutdown" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Shutdown" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Status_in">
+		<part name="xrns" type="xsd:arrayType"/>
+		<part name="creds" type="xsd:arrayType"/>
+		<part name="options" type="xsd:anyType"/>
+	</message>
+	<message name="Status_out">
+		<part name="Result" type="xsd:anyType"/>
+	</message>
+	<portType name="Status_port">
+		<operation name="Status">
+			<input message="tns:Status_in" name="Status_request"/>
+			<output message="tns:Status_out" name="Status_response"/>
+		</operation>
+	</portType>
+	<binding name="Status_binding" type="tns:Status_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Status">
+			<soap:operation soapAction="urn:Status"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Status" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Status" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="Update_in">
+		<part name="record_dict" type="xsd:anyType"/>
+		<part name="creds" type="xsd:string"/>
+	</message>
+	<message name="Update_out">
+		<part name="Result" type="xsd:int"/>
+	</message>
+	<portType name="Update_port">
+		<operation name="Update">
+			<input message="tns:Update_in" name="Update_request"/>
+			<output message="tns:Update_out" name="Update_response"/>
+		</operation>
+	</portType>
+	<binding name="Update_binding" type="tns:Update_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Update">
+			<soap:operation soapAction="urn:Update"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Update" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:Update" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="get_key_from_incoming_ip_in"/>
+	<message name="get_key_from_incoming_ip_out">
+		<part name="Result" type="xsd:int"/>
+	</message>
+	<portType name="get_key_from_incoming_ip_port">
+		<operation name="get_key_from_incoming_ip">
+			<input message="tns:get_key_from_incoming_ip_in" name="get_key_from_incoming_ip_request"/>
+			<output message="tns:get_key_from_incoming_ip_out" name="get_key_from_incoming_ip_response"/>
+		</operation>
+	</portType>
+	<binding name="get_key_from_incoming_ip_binding" type="tns:get_key_from_incoming_ip_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="get_key_from_incoming_ip">
+			<soap:operation soapAction="urn:get_key_from_incoming_ip"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:get_key_from_incoming_ip" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:get_key_from_incoming_ip" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<message name="get_trusted_certs_in">
+		<part name="cred" type="xsdl:Type18"/>
+	</message>
+	<message name="get_trusted_certs_out">
+		<part name="Result" type="xsd:arrayType"/>
+	</message>
+	<portType name="get_trusted_certs_port">
+		<operation name="get_trusted_certs">
+			<input message="tns:get_trusted_certs_in" name="get_trusted_certs_request"/>
+			<output message="tns:get_trusted_certs_out" name="get_trusted_certs_response"/>
+		</operation>
+	</portType>
+	<binding name="get_trusted_certs_binding" type="tns:get_trusted_certs_port">
+		<soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="get_trusted_certs">
+			<soap:operation soapAction="urn:get_trusted_certs"/>
+			<input>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:get_trusted_certs" use="encoded"/>
+			</input>
+			<output>
+				<soap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="urn:get_trusted_certs" use="encoded"/>
+			</output>
+		</operation>
+	</binding>
+	<types>
+		
+                
+		<xsd:schema targetNamespace="http://www.planet-lab.org/sfa/schema" xmlns="http://www.w3.org/2001/XMLSchema">
+			<xsd:complexType name="Type1">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type2">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type3">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type4">
+				<xsd:choice>
+					<element minOccurs="0" name="Record type" type="xsd:string"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type5">
+				<xsd:choice>
+					<element minOccurs="1" name="hrn or xrn" type="xsd:string"/>
+					<element minOccurs="1" name="hrn or xrn" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type6">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type7">
+				<xsd:complexContent>
+					<xsd:restriction base="soapenc:Array">
+						<xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:anyType[]"/>
+					</xsd:restriction>
+				</xsd:complexContent>
+			</xsd:complexType>
+			<xsd:complexType name="Type8">
+				<xsd:choice>
+					<element minOccurs="0" name="Record type" type="xsd:string"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type9">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type10">
+				<xsd:complexContent>
+					<xsd:restriction base="soapenc:Array">
+						<xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:anyType[]"/>
+					</xsd:restriction>
+				</xsd:complexContent>
+			</xsd:complexType>
+			<xsd:complexType name="Type11">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type12">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type13">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type14">
+				<xsd:choice>
+					<element minOccurs="0" name="Record type" type="xsd:string"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type15">
+				<xsd:choice>
+					<element minOccurs="1" name="hrn or urn" type="xsd:string"/>
+					<element minOccurs="1" name="[hrn]" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type16">
+				<xsd:choice>
+					<element minOccurs="1" name="Credential string" type="xsd:string"/>
+					<element minOccurs="1" name="List of credentials)" type="xsd:arrayType"/>
+				</xsd:choice>
+			</xsd:complexType>
+			<xsd:complexType name="Type17">
+				<xsd:complexContent>
+					<xsd:restriction base="soapenc:Array">
+						<xsd:attribute ref="soapenc:arrayType" wsdl:arrayType="xsd:anyType[]"/>
+					</xsd:restriction>
+				</xsd:complexContent>
+			</xsd:complexType>
+			<xsd:complexType name="Type18">
+				<xsd:choice>
+					<element minOccurs="0" name="Credential string" type="xsd:string"/>
+				</xsd:choice>
+			</xsd:complexType>
+		</xsd:schema>
+		
+            
+	</types>
+	<service name="slicemgr">
+		<port binding="tns:Allocate_binding" name="Allocate_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:Delete_binding" name="Delete_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:Describe_binding" name="Describe_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:GetVersion_binding" name="GetVersion_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:ListResources_binding" name="ListResources_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:PerformOperationalAction_binding" name="PerformOperationalAction_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:Provision_binding" name="Provision_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:Renew_binding" name="Renew_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:Shutdown_binding" name="Shutdown_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:Status_binding" name="Status_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+		<port binding="tns:get_trusted_certs_binding" name="get_trusted_certs_port">
+			<soap:address location="http://www.planet-lab.org/sfa/slicemgr"/>
+		</port>
+	</service>
+</wsdl:definitions>
+

@@ -1,0 +1,17 @@
+/* $Id$ */
+table.plc_details {
+    width:auto;
+    padding: 0;
+    margin: 0 auto 1.5em auto;
+    border-collapse:collapse;
+}
+
+table.plc_details>tbody>tr>th {
+    text-align: right;
+    font: italic 12px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+}
+
+table.plc_details>tbody>tr>td {
+    font: 12px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    padding: 3px 8px 3px 8px;
+}

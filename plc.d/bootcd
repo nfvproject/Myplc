@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# priority: 1000
+#
+# Rebuild the Boot CD
+#
+# Mark Huang <mlhuang@cs.princeton.edu>
+# Copyright (C) 2006 The Trustees of Princeton University
+#
+# $Id$
+# $URL$
+#
+
+# Source function library and configuration
+. /etc/plc.d/functions
+. /etc/planetlab/plc_config
+
+# Be verbose
+set -x
+
+case "$1" in
+    start)
+	if [ "$PLC_BOOT_ENABLED" != "1" -a \
+	     "$PLC_WWW_ENABLED" != "1" ] ; then
+	    exit 0
+	fi
+
+	dialog $"Rebuilding Boot CD"
+
+	# Customize the Boot CD : run build.sh on all available bootcd's
+	shopt -s nullglob
+	# xxx nodefamily xxx - might make sense to detect sequel from older installs
+	for bootcd in /usr/share/bootcd-* ; do
+	    name=$(basename $bootcd)
+	    nodefamily=$(echo $name | sed -e s,bootcd-,,)
+	    download=/var/www/html/download-${nodefamily}
+	    [ -d ${download} ] || mkdir -p ${download}
+
+	    pushd ${download}
+	    action $"Rebuilding BootCD $name" ${bootcd}/build.sh ${PLC_BUILD_ALL_BOOTCDS:+-a}
+	    check
+	    popd
+	
+	done
+
+	# just issue a warning about legacy locations
+	for legacy in /usr/share/bootcd /var/www/html/download ; do
+	    [ -e $legacy ] && echo "WARNING: found legacy location $legacy -- ignored"
+	done
+
+	result "$MESSAGE"
+	;;
+esac
+
+exit $ERRORS

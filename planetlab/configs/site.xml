@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <variables>
+    <category id="plc_db">
+      <name>Database Server</name>
+      <description>Database server definitions.</description>
+      <variablelist>
+        <variable id="password">
+          <value>3dd0996b-ade5-4e4e-90a9-4b973f2dab55</value>
+        </variable>
+        <variable id="host" type="hostname">
+          <name>Hostname</name>
+          <value>myplc.ict.ac.cn</value>
+          <description>The fully qualified hostname of the database
+	  server.</description>
+        </variable>
+      </variablelist>
+    </category>
+    <category id="plc_api">
+      <name>API Server</name>
+      <description>API (XML-RPC) server definitions.</description>
+      <variablelist>
+        <variable id="maintenance_password">
+          <value>5852c125-0a30-4913-803a-667452ccd239</value>
+        </variable>
+        <variable id="maintenance_sources">
+          <value>10.24.0.70 127.0.0.1</value>
+        </variable>
+        <variable id="host" type="hostname">
+          <name>Hostname</name>
+          <value>myplc.ict.ac.cn</value>
+          <description>The fully qualified hostname of the API
+	  server.</description>
+        </variable>
+      </variablelist>
+    </category>
+    <category id="plc">
+      <name>System</name>
+      <description>Basic system variables. Be sure that the values of
+      these variables are the same across all machines in your
+      installation.</description>
+      <variablelist>
+        <variable id="name" type="string">
+          <name>Name</name>
+          <value>CENI</value>
+          <description>The name of this PLC installation. It is used in
+	  the name of the default system site (e.g., PlanetLab Central)
+	  and in the names of various administrative entities (e.g.,
+	  PlanetLab Support).</description>
+        </variable>
+        <variable id="shortname" type="string">
+          <name>Shortame</name>
+          <value>CENI</value>
+          <description>The short name of this PLC installation. It is
+	  mostly used in the web interface when displaying local
+	  objects.</description>
+        </variable>
+        <variable id="slice_prefix" type="string">
+          <name>Slice Prefix</name>
+          <value>CENI</value>
+          <description>The abbreviated name of this PLC
+	  installation. It is used as the prefix for system slices
+	  (e.g., pl_conf). Warning: Currently, this variable should
+	  not be changed.</description>
+        </variable>
+        <variable id="root_user" type="email">
+          <name>Root Account</name>
+          <value>root@sfa.ict.ac.cn</value>
+          <description>The name of the initial administrative
+	  account. We recommend that this account be used only to create
+	  additional accounts associated with real
+	  administrators, then disabled.</description>
+        </variable>
+        <variable id="root_password" type="password">
+          <name>Root Password</name>
+          <value>060427</value>
+          <description>The password of the initial administrative
+	  account. Also the password of the root account on the Boot
+	  CD.</description>
+        </variable>
+      </variablelist>
+    </category>
+    <category id="plc_mail">
+      <name>Mail</name>
+      <description>Many maintenance scripts, as well as the API and
+      web site themselves, send e-mail notifications and
+      warnings.</description>
+      <variablelist>
+        <variable id="enabled" type="boolean">
+          <name>Enable Mail</name>
+          <value>true</value>
+          <description>Set to false to suppress all e-mail notifications
+	  and warnings.</description>
+        </variable>
+        <variable id="support_address" type="email">
+          <name>Support Address</name>
+          <value>wangyang2013@ict.ac.cn</value>
+          <description>This address is used for support
+	  requests. Support requests may include traffic complaints,
+	  security incident reporting, web site malfunctions, and
+	  general requests for information. We recommend that the
+	  address be aliased to a ticketing system such as Request
+	  Tracker.</description>
+        </variable>
+      </variablelist>
+    </category>
+    <category id="plc_net">
+      <name>Network</name>
+      <description>Network environment.</description>
+      <variablelist>
+        <variable id="dns1" type="ip">
+          <name>Primary DNS Server</name>
+          <value>10.21.2.180</value>
+          <description>Primary DNS server address.</description>
+        </variable>
+        <variable id="dns2" type="ip">
+          <name>Secondary DNS Server</name>
+          <value>10.21.2.180</value>
+          <description>Secondary DNS server address.</description>
+        </variable>
+      </variablelist>
+    </category>
+    <category id="plc_www">
+      <name>Web Server</name>
+      <description>Web server definitions.</description>
+      <variablelist>
+        <variable id="host" type="hostname">
+          <name>Hostname</name>
+          <value>myplc.ict.ac.cn</value>
+          <description>The fully qualified hostname of the web
+	  server.</description>
+        </variable>
+      </variablelist>
+    </category>
+    <category id="plc_boot">
+      <name>Boot Server</name>
+      <description>Boot server definitions. Multiple boot servers
+      may be brought up for load balancing, but we recommend that a
+      single DNS round-robin system be implemented so that the
+      following variables are the same across all of
+      them.</description>
+      <variablelist>
+        <variable id="host" type="hostname">
+          <name>Hostname</name>
+          <value>myplc.ict.ac.cn</value>
+          <description>The fully qualified hostname of the boot
+	  server.</description>
+        </variable>
+      </variablelist>
+    </category>
+    <category id="plc_omf">
+      <name>Planetlab - OMF Integration</name>
+      <description>Planetlab - OMF integration</description>
+      <variablelist>
+        <variable id="xmpp_server" type="string">
+          <name>XMPP server</name>
+          <value>10.21.2.179</value>
+          <description>The fully qualified hostname of the XMPP server.</description>
+        </variable>
+        <variable id="enabled" type="boolean">
+          <name>OMF integration</name>
+          <value>true</value>
+          <description>Enable OMF integration.</description>
+        </variable>
+      </variablelist>
+    </category>
+  </variables>
+</configuration>

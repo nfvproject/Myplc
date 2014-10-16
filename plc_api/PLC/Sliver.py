@@ -1,0 +1,312 @@
+__author__ = 'root'
+from types import StringTypes
+import time
+import re
+
+from PLC.Faults import *
+from PLC.Parameter import Parameter, Mixed
+from PLC.Filter import Filter
+from PLC.Debug import profile
+from PLC.Table import Row, Table
+from PLC.SliceInstantiations import SliceInstantiation, SliceInstantiations
+from PLC.Nodes import Node
+from PLC.Persons import Person, Persons
+from PLC.SliceTags import SliceTag
+from PLC.Timestamp import Timestamp
+
+class Slice(Row):
+    """
+    Representation of a row in the slices table. To use, optionally
+    instantiate with a dict of values. Update as you would a
+    dict. Commit to the database with sync().To use, instantiate
+    with a dict of values.
+    """
+
+    table_name = 'slices'
+    primary_key = 'slice_id'
+    join_tables = ['slice_node', 'slice_person', 'slice_tag', 'peer_slice', 'node_slice_whitelist', 'leases', ]
+    fields = {
+        'slice_id': Parameter(int, "Slice identifier"),
+        'site_id': Parameter(int, "Identifier of the site to which this slice belongs"),
+        'name': Parameter(str, "Slice name", max = 64),
+        'instantiation': Parameter(str, "Slice instantiation state"),
+        'url': Parameter(str, "URL further describing this slice", max = 254, nullok = True),
+        'description': Parameter(str, "Slice description", max = 2048, nullok = True),
+        'max_nodes': Parameter(int, "Maximum number of nodes that can be assigned to this slice"),
+        'creator_person_id': Parameter(int, "Identifier of the account that created this slice"),
+        'created': Parameter(int, "Date and time when slice was created, in seconds since UNIX epoch", ro = True),
+        'expires': Parameter(int, "Date and time when slice expires, in seconds since UNIX epoch"),
+        'node_ids': Parameter([int], "List of nodes in this slice", ro = True),
+        'person_ids': Parameter([int], "List of accounts that can use this slice", ro = True),
+        'slice_tag_ids': Parameter([int], "List of slice attributes", ro = True),
+        'peer_id': Parameter(int, "Peer to which this slice belongs", nullok = True),
+        'peer_slice_id': Parameter(int, "Foreign slice identifier at peer", nullok = True),
+        }
+    related_fields = {
+        'persons': [Mixed(Parameter(int, "Person identifier"),
+                          Parameter(str, "Email address"))],
+        'nodes': [Mixed(Parameter(int, "Node identifier"),
+                        Parameter(str, "Fully qualified hostname"))]
+        }
+
+    view_tags_name="view_slice_tags"
+    tags = {}
+
+    def validate_name(self, name):
+        # N.B.: Responsibility of the caller to ensure that login_base
+        # portion of the slice name corresponds to a valid site, if
+        # desired.
+
+        # 1. Lowercase.
+        # 2. Begins with login_base (letters or numbers).
+        # 3. Then single underscore after login_base.
+        # 4. Then letters, numbers, or underscores.
+        good_name = r'^[a-z0-9]+_[a-zA-Z0-9_]+$'
+        if not name or \
+           not re.match(good_name, name):
+            raise PLCInvalidArgument, "Invalid slice name"
+
+        conflicts = Slices(self.api, [name])
+        for slice in conflicts:
+            if 'slice_id' not in self or self['slice_id'] != slice['slice_id']:
+                raise PLCInvalidArgument, "Slice name already in use, %s"%name
+
+        return name
+
+    def validate_instantiation(self, instantiation):
+        instantiations = [row['instantiation'] for row in SliceInstantiations(self.api)]
+        if instantiation not in instantiations:
+            raise PLCInvalidArgument, "No such instantiation state"
+
+        return instantiation
+
+    validate_created = Row.validate_timestamp
+
+    def validate_expires(self, expires):
+        # N.B.: Responsibility of the caller to ensure that expires is
+        # not too far into the future.
+        check_future = not ('is_deleted' in self and self['is_deleted'])
+        return Timestamp.sql_validate( expires, check_future = check_future)
+    ##### Validates the specified GMT timestamp, returns a standardized string suitable for SQL input.
+
+    add_person = Row.add_object(Person, 'slice_person')
+    remove_person = Row.remove_object(Person, 'slice_person')
+
+    add_node = Row.add_object(Node, 'slice_node')
+    #######def add_object(self, classobj, join_table, columns = None):
+    # def add(self, obj, columns = None, commit = True):
+           # Various sanity checks
+
+            # By default, just insert the primary keys of each object into the join table.
+           # if columns is None: columns = {self.primary_key: self[self.primary_key],
+           #  obj.primary_key: obj[obj.primary_key]}
+
+           # for name, value in columns.iteritems(): params.append(self.api.db.param(name, value))
+            # self.api.db.do("INSERT INTO %s (%s) VALUES(%s)"
+            # % (join_table, ", ".join(columns), ", ".join(params)), columns)
+
+    remove_node = Row.remove_object(Node, 'slice_node')
+    #############  self.api.db.do("DELETE FROM %s WHERE %s = %s AND %s = %s" %  (join_table,
+    #   self.primary_key, self.api.db.param('self_id', self_id),
+    #  obj.primary_key, self.api.db.param('obj_id', obj_id)),  locals())
+
+    add_to_node_whitelist = Row.add_object(Node, 'node_slice_whitelist')
+    delete_from_node_whitelist = Row.remove_object(Node, 'node_slice_whitelist')
+
+    def associate_persons(self, auth, field, value):
+        """
+        Adds persons found in value list to this slice (using AddPersonToSlice).
+        Deletes persons not found in value list from this slice (using DeletePersonFromSlice).
+        """
+
+        assert 'person_ids' in self
+        assert 'slice_id' in self
+        assert isinstance(value, list)
+
+        (person_ids, emails) = self.separate_types(value)[0:2]
+
+        # Translate emails into person_ids
+        if emails:
+            persons = Persons(self.api, emails, ['person_id']).dict('person_id')
+            person_ids += persons.keys()
+
+        # Add new ids, remove stale ids
+        if self['person_ids'] != person_ids:
+            from PLC.Methods.AddPersonToSlice import AddPersonToSlice
+            from PLC.Methods.DeletePersonFromSlice import DeletePersonFromSlice
+            new_persons = set(person_ids).difference(self['person_ids'])
+            stale_persons = set(self['person_ids']).difference(person_ids)
+
+            for new_person in new_persons:
+                AddPersonToSlice.__call__(AddPersonToSlice(self.api), auth, new_person, self['slice_id'])
+            for stale_person in stale_persons:
+                DeletePersonFromSlice.__call__(DeletePersonFromSlice(self.api), auth, stale_person, self['slice_id'])
+
+    def associate_nodes(self, auth, field, value):
+        """
+        Adds nodes found in value list to this slice (using AddSliceToNodes).
+        Deletes nodes not found in value list from this slice (using DeleteSliceFromNodes).
+        """
+
+        from PLC.Nodes import Nodes
+
+        assert 'node_ids' in self
+        assert 'slice_id' in self
+        assert isinstance(value, list)
+
+        (node_ids, hostnames) = self.separate_types(value)[0:2]
+
+        # Translate hostnames into node_ids
+        if hostnames:
+            nodes = Nodes(self.api, hostnames, ['node_id']).dict('node_id')
+            node_ids += nodes.keys()
+
+        # Add new ids, remove stale ids
+        if self['node_ids'] != node_ids:
+            from PLC.Methods.AddSliceToNodes import AddSliceToNodes
+            from PLC.Methods.DeleteSliceFromNodes import DeleteSliceFromNodes
+            new_nodes = set(node_ids).difference(self['node_ids'])
+            stale_nodes = set(self['node_ids']).difference(node_ids)
+
+            if new_nodes:
+                AddSliceToNodes.__call__(AddSliceToNodes(self.api), auth, self['slice_id'], list(new_nodes))
+            if stale_nodes:
+                DeleteSliceFromNodes.__call__(DeleteSliceFromNodes(self.api), auth, self['slice_id'], list(stale_nodes))
+    def associate_slice_tags(self, auth, fields, value):
+        """
+        Deletes slice_tag_ids not found in value list (using DeleteSliceTag).
+        Adds slice_tags if slice_fields w/o slice_id is found (using AddSliceTag).
+        Updates slice_tag if slice_fields w/ slice_id is found (using UpdateSlceiAttribute).
+        """
+
+        assert 'slice_tag_ids' in self
+        assert isinstance(value, list)
+
+        (attribute_ids, blank, attributes) = self.separate_types(value)
+
+        # There is no way to add attributes by id. They are
+        # associated with a slice when they are created.
+        # So we are only looking to delete here
+        if self['slice_tag_ids'] != attribute_ids:
+            from PLC.Methods.DeleteSliceTag import DeleteSliceTag
+            stale_attributes = set(self['slice_tag_ids']).difference(attribute_ids)
+
+            for stale_attribute in stale_attributes:
+                DeleteSliceTag.__call__(DeleteSliceTag(self.api), auth, stale_attribute['slice_tag_id'])
+
+        # If dictionary exists, we are either adding new
+        # attributes or updating existing ones.
+        if attributes:
+            from PLC.Methods.AddSliceTag import AddSliceTag
+            from PLC.Methods.UpdateSliceTag import UpdateSliceTag
+
+            added_attributes = filter(lambda x: 'slice_tag_id' not in x, attributes)
+            updated_attributes = filter(lambda x: 'slice_tag_id' in x, attributes)
+
+            for added_attribute in added_attributes:
+                if 'tag_type' in added_attribute:
+                    type = added_attribute['tag_type']
+                elif 'tag_type_id' in added_attribute:
+                    type = added_attribute['tag_type_id']
+                else:
+                    raise PLCInvalidArgument, "Must specify tag_type or tag_type_id"
+
+                if 'value' in added_attribute:
+                    value = added_attribute['value']
+                else:
+                    raise PLCInvalidArgument, "Must specify a value"
+
+                if 'node_id' in added_attribute:
+                    node_id = added_attribute['node_id']
+                else:
+                    node_id = None
+
+                if 'nodegroup_id' in added_attribute:
+                    nodegroup_id = added_attribute['nodegroup_id']
+                else:
+                    nodegroup_id = None
+
+                AddSliceTag.__call__(AddSliceTag(self.api), auth, self['slice_id'], type, value, node_id, nodegroup_id)
+            for updated_attribute in updated_attributes:
+                attribute_id = updated_attribute.pop('slice_tag_id')
+                if attribute_id not in self['slice_tag_ids']:
+                    raise PLCInvalidArgument, "Attribute doesnt belong to this slice"
+                else:
+                    UpdateSliceTag.__call__(UpdateSliceTag(self.api), auth, attribute_id, updated_attribute)
+
+    def sync(self, commit = True):
+        """
+        Add or update a slice.
+        """
+
+        # Before a new slice is added, delete expired slices
+        if 'slice_id' not in self:
+            expired = Slices(self.api, expires = -int(time.time()))
+            for slice in expired:
+                slice.delete(commit)
+
+        Row.sync(self, commit)
+
+    def delete(self, commit = True):
+        """
+        Delete existing slice.
+        """
+
+        assert 'slice_id' in self
+
+        # Clean up miscellaneous join tables
+        for table in self.join_tables:
+            self.api.db.do("DELETE FROM %s WHERE slice_id = %d" % \
+                           (table, self['slice_id']))
+
+        # Mark as deleted
+        self['is_deleted'] = True
+        self.sync(commit)
+
+
+class Slices(Table):
+    """
+    Representation of row(s) from the slices table in the
+    database.
+    """
+
+    def __init__(self, api, slice_filter = None, columns = None, expires = int(time.time())):
+        Table.__init__(self, api, Slice, columns)
+
+        # the view that we're selecting upon: start with view_slices
+        view = "view_slices"
+        # as many left joins as requested tags
+        for tagname in self.tag_columns:
+            view= "%s left join %s using (%s)"%(view,Slice.tagvalue_view_name(tagname),
+                                                Slice.primary_key)
+
+        sql = "SELECT %s FROM %s WHERE is_deleted IS False" % \
+              (", ".join(self.columns.keys()+self.tag_columns.keys()),view)
+
+        if expires is not None:
+            if expires >= 0:
+                sql += " AND expires > %d" % expires
+            else:
+                expires = -expires
+                sql += " AND expires < %d" % expires
+
+        if slice_filter is not None:
+            if isinstance(slice_filter, (list, tuple, set)):
+                # Separate the list into integers and strings
+                ints = filter(lambda x: isinstance(x, (int, long)), slice_filter)
+                strs = filter(lambda x: isinstance(x, StringTypes), slice_filter)
+                slice_filter = Filter(Slice.fields, {'slice_id': ints, 'name': strs})
+                sql += " AND (%s) %s" % slice_filter.sql(api, "OR")
+            elif isinstance(slice_filter, dict):
+                slice_filter = Filter(Slice.fields, slice_filter)
+                sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
+            elif isinstance (slice_filter, StringTypes):
+                slice_filter = Filter(Slice.fields, {'name':slice_filter})
+                sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
+            elif isinstance (slice_filter, (int, long)):
+                slice_filter = Filter(Slice.fields, {'slice_id':slice_filter})
+                sql += " AND (%s) %s" % slice_filter.sql(api, "AND")
+            else:
+                raise PLCInvalidArgument, "Wrong slice filter %r"%slice_filter
+
+        self.selectall(sql)

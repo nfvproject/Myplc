@@ -1,0 +1,2 @@
+
+var nifty_inited=false;function nifty_init(){if(nifty_inited)return;var sizes={0:'small',1:'medium',2:'big',length:3};$A(sizes).each(function(size){var elements=document.getElementsByClassName('nifty-'+size);for(var i=0;i<elements.length;i++){pleRounded(elements[i],size);}});nifty_inited=true;}

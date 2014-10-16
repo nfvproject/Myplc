@@ -1,0 +1,144 @@
+#!/bin/bash
+#
+# priority: 400
+#
+# Generate GPG keys
+#
+# Mark Huang <mlhuang@cs.princeton.edu>
+# Copyright (C) 2006 The Trustees of Princeton University
+#
+
+# Source function library and configuration
+. /etc/plc.d/functions
+. /etc/planetlab/plc_config
+
+# Be verbose
+set -x
+
+case "$1" in
+    start)
+	# Make temporary GPG home directory
+	homedir=$(mktemp -d /tmp/gpg.XXXXXX)
+
+	# in case a previous gpg invocation failed in some weird way
+	# and left behind a zero length gpg key (pub or priv).
+	if [ -f $PLC_ROOT_GPG_KEY_PUB -a ! -s $PLC_ROOT_GPG_KEY_PUB ] ; then
+	    rm -f $PLC_ROOT_GPG_KEY_PUB 
+	fi
+	if [ -f $PLC_ROOT_GPG_KEY -a ! -s $PLC_ROOT_GPG_KEY ] ; then
+	    rm -f $PLC_ROOT_GPG_KEY
+	fi
+
+	if [ ! -f $PLC_ROOT_GPG_KEY_PUB -o ! -f $PLC_ROOT_GPG_KEY ] ; then
+	    # Generate new GPG keyring
+	    MESSAGE=$"Generating GPG keys"
+	    dialog "$MESSAGE"
+
+	    mkdir -p $(dirname $PLC_ROOT_GPG_KEY_PUB)
+	    mkdir -p $(dirname $PLC_ROOT_GPG_KEY)
+
+	    # Temporarily replace /dev/random with /dev/urandom to
+	    # avoid running out of entropy.
+	    # (1 9 is /dev/urandom, 1 8 is /dev/random)
+	    #
+	    # a former version of this was rm'ing /dev/random and re-creating it afterwards
+	    # however in 1.0.4 libvirt won't allow the use of mknod at all, so let's work around that
+	    # by moving things around instead
+	    #
+	    # if we find this file it's probably that a previous run has failed..
+	    [ -f /dev/random.preserve ] && { echo "Unexpected file /dev/random.preserve - exiting" ; exit 1; }
+	    mv -f /dev/random /dev/random.preserve
+	    # doesn't hurt to check 
+	    check
+	    ln -s /dev/urandom /dev/random
+	    # again 
+	    check
+	    gpg --homedir=$homedir --no-permission-warning --batch --no-tty --yes \
+		--gen-key <<EOF
+Key-Type: DSA
+Key-Length: 1024
+Subkey-Type: ELG-E
+Subkey-Length: 1024
+Name-Real: $PLC_NAME Central
+Name-Comment: http://$PLC_WWW_HOST/
+Name-Email: $PLC_MAIL_SUPPORT_ADDRESS
+Expire-Date: 0
+%pubring $PLC_ROOT_GPG_KEY_PUB
+%secring $PLC_ROOT_GPG_KEY
+%commit
+EOF
+	    check
+	    mv -f /dev/random.preserve /dev/random
+	    check
+	else
+	    # Update GPG UID
+	    MESSAGE=$"Updating GPG keys"
+	    dialog "$MESSAGE"
+
+	    # Get the current GPG fingerprint and comment
+	    OLDIFS=$IFS
+	    IFS=:
+	    while read -a fields ; do
+		if [ "${fields[0]}" = "pub" ] ; then
+		    fingerprint=${fields[4]}
+		    break
+		fi
+	    done < <(
+		gpg --homedir=$homedir --no-permission-warning --batch --no-tty --yes \
+		    --no-default-keyring \
+		    --secret-keyring=$PLC_ROOT_GPG_KEY \
+		    --keyring=$PLC_ROOT_GPG_KEY_PUB \
+		    --list-public-keys --with-colons
+		check
+	    )
+	    IFS=$OLDIFS
+
+	    # Add a new UID if appropriate. GPG will detect and merge duplicates.
+	    gpg --homedir=$homedir --no-permission-warning --batch --no-tty --yes \
+		--no-default-keyring \
+		--secret-keyring=$PLC_ROOT_GPG_KEY \
+		--keyring=$PLC_ROOT_GPG_KEY_PUB \
+		--command-fd 0 --status-fd 1 --edit-key $fingerprint <<EOF
+adduid
+$PLC_NAME Central
+$PLC_MAIL_SUPPORT_ADDRESS
+http://$PLC_WWW_HOST/
+save
+EOF
+	    check
+	fi
+
+	# Install the key in the RPM database
+	mkdir -p /etc/pki/rpm-gpg
+	gpg --homedir=$homedir --no-permission-warning --batch --no-tty --yes \
+	    --no-default-keyring \
+	    --secret-keyring=$PLC_ROOT_GPG_KEY \
+	    --keyring=$PLC_ROOT_GPG_KEY_PUB \
+	    --export --armor >"/etc/pki/rpm-gpg/RPM-GPG-KEY-$PLC_NAME"
+	check
+	if rpm -q gpg-pubkey ; then
+	    rpm --allmatches -e gpg-pubkey
+	    check
+	fi
+	# starting with rpm-4.6, this fails when run a second time
+	# it would be complex to do this properly based on the filename, 
+	# as /etc/pki/rpm-gpg/ typically has many symlinks to the same file
+	# see also http://fedoranews.org/tchung/gpg/
+	# so just ignore the result
+	rpm --import /etc/pki/rpm-gpg/* || :
+	check
+
+	# Make GPG key readable by apache so that the API can sign peer requests
+	chown apache $PLC_ROOT_GPG_KEY
+	chmod 644 $PLC_ROOT_GPG_KEY_PUB
+	chmod 600 $PLC_ROOT_GPG_KEY
+	check
+
+	# Cleanup
+	rm -rf $homedir
+
+	result "$MESSAGE"
+	;;
+esac
+
+exit $ERRORS

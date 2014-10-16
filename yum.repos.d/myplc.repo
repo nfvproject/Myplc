@@ -1,0 +1,6 @@
+[myplc]
+name= MyPLC
+baseurl=http://build.onelab.eu/5.2/5.2.9/lxc--5.2.9-f18-64/RPMS/
+exclude=sfa*
+enabled=1
+gpgcheck=0

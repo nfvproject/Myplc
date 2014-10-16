@@ -1,0 +1,81 @@
+
+"""A very simple logger that tries to be concurrency-safe."""
+
+import os, sys
+import time
+import traceback
+import subprocess
+import select
+
+LOG_FILE    = '/var/log/nodemanager'
+LOG_SLIVERS = '/var/lib/nodemanager/getslivers.txt'
+LOG_DATABASE = '/var/lib/nodemanager/database.txt'
+LOG_MAP = '/var/log/slice/map.txt'
+LOG_ROUTER = '/var/log/slice/router.txt'
+
+# basically define 3 levels
+LOG_NONE=0
+LOG_NODE=1
+LOG_VERBOSE=2
+
+# default is to log a reasonable amount of stuff for when running on operational nodes
+LOG_LEVEL=LOG_NODE
+
+def set_level(level):
+    global LOG_LEVEL
+    try:
+        assert level in [LOG_NONE,LOG_NODE,LOG_VERBOSE]
+        LOG_LEVEL=level
+    except:
+        logger.log("Failed to set LOG_LEVEL to %s"%level)
+
+def verbose(msg):
+    log('(v) '+msg,LOG_VERBOSE)
+
+def logslice(msg,logfile):
+    try:
+        fd = os.open(logfile, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0600)
+        if not msg.endswith('\n'): msg += '\n'
+        os.write(fd, '%s' % (msg))
+        os.close(fd)
+    except OSError:
+        sys.stderr.write(msg)
+        sys.stderr.flush()    
+def logmap(sliceid,vmid):
+    mapfile = '/var/log/slice/map'
+    msg = 't'
+    msg +=str(sliceid)
+    msg += '='
+    msg += str(vmid)
+    try:
+        fd = os.open(mapfile, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0600)
+        if not msg.endswith('\n'): msg += '\n'
+        os.write(fd, '%s' % (msg))
+        os.close(fd)
+    except OSError:
+        sys.stderr.write(msg)
+        sys.stderr.flush() 
+def log(msg,level=LOG_NODE):
+    """Write <msg> to the log file if level >= current log level (default LOG_NODE)."""
+    if (level > LOG_LEVEL):
+        return
+    try:
+        fd = os.open(LOG_FILE, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0600)
+        if not msg.endswith('\n'): msg += '\n'
+        os.write(fd, '%s: %s' % (time.asctime(time.gmtime()), msg))
+        os.close(fd)
+    except OSError:
+        sys.stderr.write(msg)
+        sys.stderr.flush()
+
+def log_exc(msg="",name=None):
+    """Log traceback resulting from an exception."""
+    printout=""
+    if name: printout += "%s: "%name
+    printout += "EXCEPTION caught <%s> \n %s" %(msg, traceback.format_exc())
+    log(printout)
+
+def log_trace(msg="",name=None):
+    """Log current stack"""
+    printout=""
+

@@ -1,0 +1,262 @@
+#!/bin/bash
+#
+# priority: 1200
+#
+# Update node package repository metadata and sign packages
+#
+# Mark Huang <mlhuang@cs.princeton.edu>
+# Copyright (C) 2006 The Trustees of Princeton University
+# Thierry Parmentelat <thierry.parmentelat@inria.fr>
+#
+
+# Source function library and configuration
+. /etc/plc.d/functions
+. /etc/planetlab/plc_config
+
+# Be verbose
+set -x
+
+#################### 
+# 
+# (*) sometimes we have yum issuing errors like 'package does not match intended content'
+#  this means that the sha256 checksum of the downloaded pkg does not match 
+#    the sha256 checksum advertised in filelists.xml
+#  if you did run 'yum clean all' on the node, 
+#    this means that the repodata/ dir. on the server side is out of date 
+#  forcing a createrepo should solve this 
+# 
+# (*) also sometimes the node complains that a package is not signed
+#
+# so there quite obviously are some corner cases that are not well handled
+# hopefully the following subforms may be helpful to recover in these cases
+# 
+# /etc/plc.d/packages clean
+#   performs cleanup of the yum repositories and signed-stamps
+#   thus forcing the next 'start' command to re-sign and re-index everything
+# /etc/plc.d/packages superclean
+#   like 'clean', plus this will reinstall the noderepo rpms that you have, 
+#   that is to say restart from unsigned rpms
+# /etc/plc.d/packages start
+#   this is the usual form, it should be smart enough to only sign the packages that need to, 
+#   and to rerun createrepo when useful
+# /etc/plc.d/packages force
+#   same as 'start' but createrepo is run unconditionnally
+# 
+# PS. I suspect sometimes the signing fails and the script does not notice properly
+#################### 
+
+
+# helper for hacking yumgroups
+# if we've installed for several flavours
+# we create cross links in install-rpms like this one
+# ./onelab-f8-i386/sliceimage-onelab-f12-i386-5.0-6.2011.02.03.i686.rpm 
+#   -> /var/www/html/install-rpms/onelab-f12-i386/sliceimage-onelab-f12-i386-5.0-6.2011.02.03.i686.rpm
+#
+# but this won't make it to the nodes until they are insered in yumgroups.xml in the PlanetLab group
+# 
+
+function hack_yumgroups () {
+    repo=$1; shift
+
+    pushd $repo >& /dev/null
+    pwd
+    sirpms=$(find . -name 'sliceimage*rpm')
+    echo found sirpms $sirpms
+    if [ ! -f yumgroups.xml ] ; then
+	echo "hack_yumgroups: could not find yumgroups in $(pwd)" 
+    elif [ -z "$sirpms" ] ; then
+	echo "No need to hack yumgroups, no foreign sliceimage package found"
+    else
+	cp yumgroups.xml yumgroups.xml.hacking
+	# remove references to package sliceimage-
+	grep -v '>sliceimage-' yumgroups.xml.hacking > yumgroups.xml
+	# build a list of lines with corresponding rpm names
+	insert=""
+	for sirpm in $sirpms; do
+	    rpmname=$(rpm -q --qf '%{name}' -p $sirpm)
+	    echo found file $sirpm with name $rpmname
+	    insert="$insert<packagereq type=\"mandatory\">$rpmname</packagereq>"
+	done
+	echo 'inserting' $insert
+	# insert in yumgroups at the right place -- first packages in the PlanetLab group
+	ed yumgroups.xml <<EOF
+1
+/name>PlanetLab<
+/packagelist
++
+i
+$insert
+.
+w
+q
+EOF
+    fi
+    popd >& /dev/null
+}
+
+####################
+case "$1" in
+    start|force)
+	if [ "$PLC_BOOT_ENABLED" != "1" ] ; then
+	    exit 0
+	fi
+
+	MESSAGE=$"Signing and indexing node packages"
+	dialog "$MESSAGE"
+
+	shopt -s nullglob
+
+	mode=$1; shift
+
+	# hack for PLC
+	# there are some very old repos there, as well as some sensitive areas
+	# so by convention the repositories that have a 'PRESERVE' file won't
+	# be touched by the cross-flavour stuff
+	# i.e. no symlinks get created to or from there,
+	# and yumgroups is untouched
+
+	# use argv if provided
+	if [[ -n "$@" ]] ; then
+	    repositories="$@"
+	else
+  	    # consider all subdirs in install-rpms by default, except the slice repos
+	    # use find instead of ls - for the corner case where the dir. is empty
+	    # (thanks Thomas Dreibholz for the heads up)
+	    repositories=$(find /var/www/html/install-rpms -maxdepth 1 -mindepth 1 -type d \! -name 'slice-*' 2> /dev/null)
+	fi
+
+	# filter out PRESERVE'd repos
+	cross_repositories=""
+	for repository in $repositories; do
+	    [ -f $repository/PRESERVE ] || cross_repositories="$cross_repositories $repository"
+	done
+
+	##########
+	# deal with the sliceimage packages
+	# symlink all instances of plain 'sliceimage-*rpm' in all repos
+	# and cleanup old links 
+	sirpms=$(find $cross_repositories -name 'sliceimage*rpm' -a -type f)
+	# for nicer upgrades, also remove symlinks from 5.0
+	silinks=$(find $cross_repositories '(' -name 'sliceimage*rpm' -o -name 'vserver*rpm' ')' -a -type l)
+
+	for silink in $silinks; do
+	    [ ! -e $silink ] && { echo removing old $silink; rm $silink; }
+	done
+
+	for repository in $cross_repositories; do
+	    for sirpm in $sirpms; do
+	    # if in the repository we're dealing with, ignore
+		if [ "$(echo $sirpm | sed -e s,^$repository,,)" != $sirpm ] ; then
+		    continue
+		fi
+		b=$(basename $sirpm)
+		link=$repository/$b
+		if [ ! -e $link ] ; then
+		    echo "creating symlink $link towards $sirpm"
+		    ln -s $sirpm $link
+		fi
+	    done
+	done
+
+	##########
+	# now that the symlinks are OK, we can tweak yumgroups
+	for repository in $cross_repositories; do
+	    hack_yumgroups $repository
+	done
+
+	########## sign plain packages
+	for repository in $repositories ; do
+	    # skip non-directory
+	    [ -d $repository ] || continue
+	    # the rpms that need signing
+	    new_rpms=
+	    # and the corresponding stamps
+	    new_stamps=
+	    # is there a need to refresh yum metadata
+	    # a safe approach would be to always run createrepo
+	    # however this is painfully slow with multi-flavour installed
+	    need_createrepo= 
+	    # however if we run this script like
+	    # /etc/plc.d/packages force
+	    # then we force a createrepo
+	    [ "$mode" == force ] && need_createrepo=true
+
+	    # right after installation, no package is present
+	    # but we still need to create index 
+	    [ ! -f $repository/repodata/repomd.xml ] && need_createrepo=true
+
+	    # it's not helpful to sign symlinks that will get signed on their own
+	    for package in $(find $repository/ -name '*.rpm' -a \! -type l) ; do
+	        stamp=$repository/signed-stamps/$(basename $package).signed
+		# If package is newer than signature stamp
+		if [ $package -nt $stamp ] ; then
+		    new_rpms="$new_rpms $package"
+		    new_stamps="$new_stamps $stamp"
+		fi
+		# Or than createrepo database
+		[ $package -nt $repository/repodata/repomd.xml ] && need_createrepo=true
+		[ $package -nt $repository/repodata/filelists.xml.gz ] && need_createrepo=true
+	    done
+
+	    if [ -n "$new_rpms" ] ; then
+		# Create a stamp once the package gets signed
+		mkdir $repository/signed-stamps 2> /dev/null
+
+		# Sign RPMS. setsid detaches rpm from the terminal,
+                # allowing the (hopefully blank) GPG password to be
+                # entered from stdin instead of /dev/tty.
+		echo | setsid rpm \
+		    --define "_signature gpg" \
+		    --define "_gpg_path /etc/planetlab" \
+		    --define "_gpg_name $PLC_MAIL_SUPPORT_ADDRESS" \
+		    --resign $new_rpms && touch $new_stamps
+#		check
+		# if we sign at least one package then we need to reindex
+		need_createrepo=true
+	    fi
+
+	    # Update repository index / yum metadata. 
+
+	    if [ -n "$need_createrepo" ] ; then
+		if [ -f $repository/yumgroups.xml ] ; then
+		    createrepo --quiet -g yumgroups.xml $repository 
+		    check
+		else
+		    createrepo --quiet $repository
+		    check
+		fi
+	    fi
+	done
+
+	result "$MESSAGE"
+	;;
+    clean)
+	shift
+	if [[ -z "$@" ]] ; then
+	    # use all subdirs in install-rpms by default
+	    repositories=/var/www/html/install-rpms/*
+	else
+	    # else use argv
+	    repositories=$@
+	fi
+
+	for repository in $repositories ; do
+	    rm -rf $repository/signed-stamps
+	    rm -rf $repository/repodata
+	    find $repository -type l | xargs rm
+	done
+	;;
+    # (use this only if you have noderepos installed)
+    superclean)
+	shift
+	find /var/www/html/install-rpms -name signed-stamps | xargs rm -rf
+	find /var/www/html/install-rpms -name repodata | xargs rm -rf
+	find /var/www/html/install-rpms -type l | xargs rm
+	rpm -aq | grep noderepo | xargs yum -y reinstall
+	;;
+    *)
+        echo "Usage: $0 start|force|clean [repo ..]"
+	;;
+esac
+
+exit $ERRORS
